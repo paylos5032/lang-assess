@@ -11,6 +11,7 @@ export default function NewAssessment() {
   const [minutes, setMinutes] = useState("12");
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [link, setLink] = useState("");
 
   function createLink() {
     localStorage.setItem("company", company);
@@ -27,12 +28,14 @@ export default function NewAssessment() {
     localStorage.removeItem("email");
     localStorage.removeItem("emailReply");
     localStorage.removeItem("chatLog");
+    const nextLink = window.location.origin + "/welcome";
+    setLink(nextLink);
     setReady(true);
     setCopied(false);
   }
 
   function copyLink() {
-    navigator.clipboard.writeText("http://localhost:3000/welcome");
+    navigator.clipboard.writeText(link);
     setCopied(true);
   }
 
@@ -136,8 +139,8 @@ export default function NewAssessment() {
           <div className="mt-6">
             <p className="text-black">
               Link for the candidate:{" "}
-              <a className="underline" href="/welcome">
-                http://localhost:3000/welcome
+              <a className="underline" href={link}>
+                {link}
               </a>
             </p>
             <button
