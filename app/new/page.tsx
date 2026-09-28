@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function NewAssessment() {
   const [company, setCompany] = useState("");
@@ -12,26 +13,30 @@ export default function NewAssessment() {
   const [ready, setReady] = useState(false);
   const [copied, setCopied] = useState(false);
   const [link, setLink] = useState("");
+  const [error, setError] = useState("");
 
-  function createLink() {
-    localStorage.setItem("company", company);
-    localStorage.setItem("position", position);
-    localStorage.setItem("language", language);
-    localStorage.setItem("source1", text1);
-    localStorage.setItem("source2", text2);
-    localStorage.setItem("minutes", minutes);
-    localStorage.removeItem("task1");
-    localStorage.removeItem("task2");
-    localStorage.removeItem("leftTab1");
-    localStorage.removeItem("leftTab2");
-    localStorage.removeItem("candidate");
-    localStorage.removeItem("email");
-    localStorage.removeItem("emailReply");
-    localStorage.removeItem("chatLog");
-    const nextLink = window.location.origin + "/welcome";
+  async function createLink() {
+    const id = Math.random().toString(36).slice(2, 10);
+    const { error: saveError } = await supabase.from("assessments").insert({
+      id,
+      company,
+      position,
+      language,
+      minutes,
+      source1: text1,
+      source2: text2,
+    });
+
+    if (saveError) {
+      setError(saveError.message);
+      return;
+    }
+
+    const nextLink = window.location.origin + "/welcome?id=" + id;
     setLink(nextLink);
     setReady(true);
     setCopied(false);
+    setError("");
   }
 
   function copyLink() {
@@ -62,9 +67,6 @@ export default function NewAssessment() {
     <main className="min-h-screen bg-white p-8">
       <div className="mx-auto max-w-xl">
         <h1 className="text-3xl font-semibold text-black">New assessment</h1>
-        <p className="mt-2 text-gray-600">
-          Fill the company details, then generate or paste the two texts.
-        </p>
 
         <label className="mt-8 block text-sm text-black">Company</label>
         <input
@@ -112,16 +114,14 @@ export default function NewAssessment() {
           Generate texts
         </button>
 
-        <label className="mt-6 block text-sm text-black">Text 1 (into English)</label>
+        <label className="mt-6 block text-sm text-black">Text 1</label>
         <textarea
           className="mt-2 h-28 w-full rounded-xl border border-gray-300 p-3 text-black"
           value={text1}
           onChange={(event) => setText1(event.target.value)}
         />
 
-        <label className="mt-6 block text-sm text-black">
-          Text 2 (into the assessed language)
-        </label>
+        <label className="mt-6 block text-sm text-black">Text 2</label>
         <textarea
           className="mt-2 h-28 w-full rounded-xl border border-gray-300 p-3 text-black"
           value={text2}
@@ -135,14 +135,11 @@ export default function NewAssessment() {
           Create link
         </button>
 
+        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+
         {ready && (
           <div className="mt-6">
-            <p className="text-black">
-              Link for the candidate:{" "}
-              <a className="underline" href={link}>
-                {link}
-              </a>
-            </p>
+            <p className="break-all text-black">{link}</p>
             <button
               onClick={copyLink}
               className="mt-3 text-sm text-black underline"
