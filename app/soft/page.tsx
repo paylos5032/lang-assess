@@ -1,29 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function Soft() {
+  const [id, setId] = useState("");
   const [reply, setReply] = useState("");
 
-  function save(event: React.MouseEvent) {
-    event.preventDefault();
-    if (!reply.trim()) {
-      window.alert("Please write a reply.");
-      return;
+  useEffect(() => {
+    const value = new URLSearchParams(window.location.search).get("id") || "";
+    setId(value);
+    if (value) localStorage.setItem("testid", value);
+  }, []);
+
+  async function nextPage() {
+    if (id) {
+      await supabase
+        .from("assessments")
+        .update({ email_reply: reply })
+        .eq("id", id);
     }
-    localStorage.setItem("emailReply", reply.trim());
-    window.location.href = "/chat";
+    window.location.href = id ? "/chat?id=" + id : "/chat";
   }
 
   return (
     <main className="min-h-screen bg-white p-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-xl">
         <h1 className="text-3xl font-semibold text-black">Customer email</h1>
         <p className="mt-3 text-gray-600">
           Write the reply you would send. Do not copy. This is not timed.
         </p>
-
-        <div className="mt-8 rounded-xl border border-gray-200 p-4 text-black select-none">
+        <div className="mt-6 rounded-xl border border-gray-200 p-4 text-black">
           Subject: Still waiting for my order
           <br />
           <br />
@@ -35,23 +42,19 @@ export default function Soft() {
           <br />
           Anna
         </div>
-
-        <label className="mt-6 block text-sm text-black">Your reply</label>
         <textarea
-          className="mt-2 h-48 w-full rounded-xl border border-gray-300 p-4 text-black"
+          className="mt-6 h-36 w-full rounded-xl border border-gray-300 p-3 text-black"
           placeholder="Write your email reply here"
           value={reply}
           onChange={(event) => setReply(event.target.value)}
           onPaste={(event) => event.preventDefault()}
         />
-
-        <a
-          href="/chat"
-          onClick={save}
-          className="mt-8 inline-block rounded-full bg-black px-6 py-3 text-white"
+        <button
+          onClick={nextPage}
+          className="mt-8 rounded-full bg-black px-6 py-3 text-white"
         >
           Continue
-        </a>
+        </button>
       </div>
     </main>
   );
