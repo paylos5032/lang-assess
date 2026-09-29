@@ -1,102 +1,93 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 export default function Task() {
-  const [seconds, setSeconds] = useState(12 * 60);
-  const [text, setText] = useState("");
+  const [id, setId] = useState("");
   const [source, setSource] = useState("");
-  const [position, setPosition] = useState("");
-  const [leftTab, setLeftTab] = useState(false);
+  const [answer, setAnswer] = useState("");
+  const [seconds, setSeconds] = useState(12 * 60);
 
   useEffect(() => {
-    setSource(localStorage.getItem("source1") || "No text was set.");
-    setPosition(localStorage.getItem("position") || "");
-    const minutes = Number(localStorage.getItem("minutes") || "12");
-    setSeconds(minutes * 60);
-  }, []);
+    const value = new URLSearchParams(window.location.search).get("id") || "";
+    setId(value);
+    if (value) localStorage.setItem("testid", value);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSeconds((value) => (value > 0 ? value - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(timer);
+    async function load() {
+      if (!value) return;
+      const { data } = await supabase
+        .from("assessments")
+        .select("source1, minutes")
+        .eq("id", value)
+        .single();
+      if (data?.source1) setSource(data.source1);
+      if (data?.minutes) setSeconds(Number(data.minutes) * 60);
+    }
+    load();
   }, []);
 
   useEffect(() => {
     function onHide() {
-      if (document.hidden) {
-        setLeftTab(true);
-        localStorage.setItem("leftTab1", "yes");
+      if (document.hidden && id) {
+        supabase.from("assessments").update({ left_tab1: "yes" }).eq("id", id);
       }
     }
     document.addEventListener("visibilitychange", onHide);
     return () => document.removeEventListener("visibilitychange", onHide);
-  }, []);
+  }, [id]);
 
   useEffect(() => {
-    if (seconds === 0) {
-      localStorage.setItem("task1", text);
-      window.location.href = "/task-2";
+    const timer = setInterval(() => {
+      setSeconds((value) => {
+        if (value <= 1) {
+          clearInterval(timer);
+          finish();
+          return 0;
+        }
+        return value - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [id, answer]);
+
+  async function finish() {
+    if (id) {
+      await supabase.from("assessments").update({ task1: answer }).eq("id", id);
     }
-  }, [seconds, text]);
+    window.location.href = id ? "/task-2?id=" + id : "/task-2";
+  }
 
   const minutes = Math.floor(seconds / 60);
   const rest = seconds % 60;
-  const time = `${minutes}:${rest.toString().padStart(2, "0")}`;
-
-  function goNext(event: React.MouseEvent) {
-    event.preventDefault();
-    if (!window.confirm("Submit Task 1? You cannot go back.")) return;
-    localStorage.setItem("task1", text);
-    window.location.href = "/task-2";
-  }
 
   return (
     <main className="min-h-screen bg-white p-8">
-      <div className="mx-auto max-w-4xl">
-        {leftTab && (
-          <p className="mb-4 text-sm text-red-600">
-            You left this page. This will be noted in the report.
-          </p>
-        )}
-        {seconds > 0 && seconds <= 60 && (
-          <p className="mb-4 text-sm text-red-600">Less than 1 minute left.</p>
-        )}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Task 1 of 2{position ? ` · ${position}` : ""}
-          </p>
-          <p className="text-lg font-medium text-black">{time}</p>
-        </div>
-        <h1 className="mt-2 text-2xl font-semibold text-black">
-          Translate into English
-        </h1>
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          <div
-            className="rounded-xl border border-gray-200 p-4 text-black select-none"
-            onCopy={(event) => event.preventDefault()}
-            onCut={(event) => event.preventDefault()}
-            onContextMenu={(event) => event.preventDefault()}
-          >
-            {source}
-          </div>
-          <textarea
-            className="h-48 rounded-xl border border-gray-300 p-4 text-black"
-            placeholder="Type your English translation here"
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-            onPaste={(event) => event.preventDefault()}
-          />
-        </div>
-        <a
-          href="/task-2"
-          onClick={goNext}
-          className="mt-8 inline-block rounded-full bg-black px-6 py-3 text-white"
+      <div className="mx-auto max-w-xl">
+        <h1 className="text-3xl font-semibold text-black">Translation 1</h1>
+        <p className="mt-2 text-black">
+          {minutes}:{rest.toString().padStart(2, "0")}
+        </p>
+        <p
+          className="mt-6 select-none text-black"
+          onCopy={(event) => event.preventDefault()}
+          onCut={(event) => event.preventDefault()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {source || "Loading text..."}
+        </p>
+        <textarea
+          className="mt-6 h-40 w-full rounded-xl border border-gray-300 p-3 text-black"
+          value={answer}
+          onChange={(event) => setAnswer(event.target.value)}
+          onPaste={(event) => event.preventDefault()}
+        />
+        <button
+          onClick={finish}
+          className="mt-8 rounded-full bg-black px-6 py-3 text-white"
         >
           Done
-        </a>
+        </button>
       </div>
     </main>
   );
