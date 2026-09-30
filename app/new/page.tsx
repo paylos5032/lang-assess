@@ -11,8 +11,9 @@ export default function NewAssessment() {
   const [text2, setText2] = useState("");
   const [minutes, setMinutes] = useState("12");
   const [ready, setReady] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [link, setLink] = useState("");
+  const [copied, setCopied] = useState("");
+  const [candidateLink, setCandidateLink] = useState("");
+  const [reportLink, setReportLink] = useState("");
   const [error, setError] = useState("");
 
   async function createLink() {
@@ -32,16 +33,17 @@ export default function NewAssessment() {
       return;
     }
 
-    const nextLink = window.location.origin + "/welcome?id=" + id;
-    setLink(nextLink);
+    const origin = window.location.origin;
+    setCandidateLink(origin + "/welcome?id=" + id);
+    setReportLink(origin + "/report?id=" + id);
     setReady(true);
-    setCopied(false);
+    setCopied("");
     setError("");
   }
 
-  function copyLink() {
-    navigator.clipboard.writeText(link);
-    setCopied(true);
+  function copy(text: string, label: string) {
+    navigator.clipboard.writeText(text);
+    setCopied(label);
   }
 
   function generateTexts() {
@@ -138,13 +140,22 @@ export default function NewAssessment() {
         {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
 
         {ready && (
-          <div className="mt-6">
-            <p className="break-all text-black">{link}</p>
+          <div className="mt-6 text-black">
+            <p>Candidate link</p>
+            <p className="break-all">{candidateLink}</p>
             <button
-              onClick={copyLink}
-              className="mt-3 text-sm text-black underline"
+              onClick={() => copy(candidateLink, "candidate")}
+              className="mt-2 text-sm underline"
             >
-              {copied ? "Copied" : "Copy link"}
+              {copied === "candidate" ? "Copied" : "Copy candidate link"}
+            </button>
+            <p className="mt-6">Company report</p>
+            <p className="break-all">{reportLink}</p>
+            <button
+              onClick={() => copy(reportLink, "report")}
+              className="mt-2 text-sm underline"
+            >
+              {copied === "report" ? "Copied" : "Copy report link"}
             </button>
           </div>
         )}
