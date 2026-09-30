@@ -47,22 +47,18 @@ export default function NewAssessment() {
   }
 
   function generateTexts() {
-    const firm = company || "the company";
-    const role = position || "this role";
-    setText1(
-      "Hello, I am interested in the " +
-        role +
-        " role at " +
-        firm +
-        ". I sent a question yesterday and I am still waiting for an answer."
-    );
-    setText2(
-      "Please tell the customer that " +
-        firm +
-        " received the request. Someone from the " +
-        role +
-        " team will call tomorrow."
-    );
+    const options1 = [
+      "Hello, I placed an order last Friday and paid by card. The tracking page still says preparing. I need the parcel before Tuesday because I am travelling. Please tell me if it has left the warehouse and what I should do if it does not arrive in time.",
+      "Hi, I received the wrong size and the return label in the box does not work. I already wrote twice and nobody answered. I want a prepaid return and a replacement sent as soon as you confirm this email.",
+      "Good morning, my package was marked delivered yesterday but nothing was at the door. The neighbour did not take it. Please open an investigation and tell me how long a refund or reshipment will take.",
+    ];
+    const options2 = [
+      "Please write to the customer that we checked the order. A new label will be sent today. If the parcel is not scanned in 48 hours, we will refund the payment without another request.",
+      "Please apologise for the delay and explain that the item is back in stock. Offer a prepaid return and a replacement, and ask the customer to confirm the delivery address in one reply.",
+      "Please tell the customer we opened a delivery investigation. They will get an update within one working day. Until then they should not order the same item again.",
+    ];
+    setText1(options1[Math.floor(Math.random() * options1.length)]);
+    setText2(options2[Math.floor(Math.random() * options2.length)]);
   }
 
   return (
