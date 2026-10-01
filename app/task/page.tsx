@@ -6,6 +6,7 @@ import { supabase } from "../lib/supabase";
 export default function Task() {
   const [id, setId] = useState("");
   const [source, setSource] = useState("");
+  const [language, setLanguage] = useState("");
   const [answer, setAnswer] = useState("");
   const [seconds, setSeconds] = useState(12 * 60);
 
@@ -18,10 +19,11 @@ export default function Task() {
       if (!value) return;
       const { data } = await supabase
         .from("assessments")
-        .select("source1, minutes")
+        .select("source1, minutes, language")
         .eq("id", value)
         .single();
       if (data?.source1) setSource(data.source1);
+      if (data?.language) setLanguage(data.language);
       if (data?.minutes) setSeconds(Number(data.minutes) * 60);
     }
     load();
@@ -66,6 +68,9 @@ export default function Task() {
       <div className="mx-auto max-w-xl">
         <h1 className="text-3xl font-semibold text-black">Translation 1</h1>
         <p className="mt-2 text-black">
+          Translate this {language || "text"} into English.
+        </p>
+        <p className="mt-2 text-black">
           {minutes}:{rest.toString().padStart(2, "0")}
         </p>
         <p
@@ -78,6 +83,7 @@ export default function Task() {
         </p>
         <textarea
           className="mt-6 h-40 w-full rounded-xl border border-gray-300 p-3 text-black"
+          placeholder="Write the English translation here"
           value={answer}
           onChange={(event) => setAnswer(event.target.value)}
           onPaste={(event) => event.preventDefault()}
