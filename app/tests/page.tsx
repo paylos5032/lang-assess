@@ -9,6 +9,7 @@ type Row = {
   position: string;
   candidate: string;
   email: string;
+  created_at: string;
 };
 
 export default function Tests() {
@@ -18,22 +19,28 @@ export default function Tests() {
     async function load() {
       const { data } = await supabase
         .from("assessments")
-        .select("id, company, position, candidate, email")
-        .order("id");
+        .select("id, company, position, candidate, email, created_at")
+        .order("created_at", { ascending: false });
       if (data) setRows(data as Row[]);
     }
     load();
   }, []);
 
+  function formatDate(value: string) {
+    if (!value) return "-";
+    return new Date(value).toLocaleString();
+  }
+
   return (
     <main className="min-h-screen bg-white p-8">
       <div className="mx-auto max-w-xl text-black">
         <h1 className="text-3xl font-semibold">All tests</h1>
-        <p className="mt-3 text-gray-600">Open a report for any assessment.</p>
+        <p className="mt-3 text-gray-600">Newest first.</p>
         {rows.length === 0 && <p className="mt-6">No tests yet.</p>}
         {rows.map((row) => (
           <div key={row.id} className="mt-6 border-t border-gray-200 pt-4">
             <p>{row.candidate || "No name yet"}</p>
+            <p className="text-sm text-gray-600">{formatDate(row.created_at)}</p>
             <p className="text-sm text-gray-600">
               {row.company || "-"} / {row.position || "-"}
             </p>
