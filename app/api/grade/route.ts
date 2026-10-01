@@ -61,7 +61,7 @@ Do not use markdown.
       Authorization: "Bearer " + process.env.XAI_API_KEY,
     },
     body: JSON.stringify({
-      model: "grok-4",
+      model: "grok-4.7",
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -70,7 +70,7 @@ Do not use markdown.
   const text = result.choices?.[0]?.message?.content;
   if (!text) {
     return NextResponse.json(
-      { error: result.error?.message || "No grade returned" },
+      { error: JSON.stringify(result).slice(0, 400) },
       { status: 500 }
     );
   }
