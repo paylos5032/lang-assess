@@ -18,26 +18,47 @@ type Row = {
   task2: string;
   left_tab1: string;
   left_tab2: string;
+  ai_grade: string;
 };
 
 export default function Report() {
   const [id, setId] = useState("");
   const [row, setRow] = useState<Row | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("id") || "";
     setId(value);
-    async function load() {
-      if (!value) return;
-      const { data } = await supabase
-        .from("assessments")
-        .select("*")
-        .eq("id", value)
-        .single();
-      if (data) setRow(data as Row);
-    }
-    load();
+    load(value);
   }, []);
+
+  async function load(value: string) {
+    if (!value) return;
+    const { data } = await supabase
+      .from("assessments")
+      .select("*")
+      .eq("id", value)
+      .single();
+    if (data) setRow(data as Row);
+  }
+
+  async function grade() {
+    setBusy(true);
+    setError("");
+    const response = await fetch("/api/grade", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    const result = await response.json();
+    setBusy(false);
+    if (!response.ok) {
+      setError(result.error || "Grading failed");
+      return;
+    }
+    await load(id);
+  }
 
   function points(answer: string, source: string) {
     if (!answer || !answer.trim()) return 0;
@@ -76,10 +97,16 @@ export default function Report() {
       <div className="mx-auto max-w-xl text-black">
         <h1 className="text-3xl font-semibold">Company report</h1>
         <p className="mt-6 text-2xl font-semibold">Score: {total} / 40</p>
-        <p className="mt-2 text-sm text-gray-600">
-          First check only. It looks at length and whether they left the page.
-          It does not judge language quality yet.
-        </p>
+        <button
+          onClick={grade}
+          className="mt-4 rounded-full bg-black px-6 py-3 text-white"
+        >
+          {busy ? "Grading..." : "Grade with AI"}
+        </button>
+        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {row.ai_grade && (
+          <pre className="mt-6 whitespace-pre-wrap text-sm">{row.ai_grade}</pre>
+        )}
         <p className="mt-6">Candidate: {row.candidate || "-"}</p>
         <p>Email: {row.email || "-"}</p>
         <p>Company: {row.company || "-"}</p>
@@ -87,17 +114,17 @@ export default function Report() {
         <p>Language: {row.language || "-"}</p>
         <p className="mt-6">Left Task 1 tab: {row.left_tab1 || "No"}</p>
         <p>Left Task 2 tab: {row.left_tab2 || "No"}</p>
-        <h2 className="mt-8 font-semibold">Email reply ({emailScore}/10)</h2>
+        <h2 className="mt-8 font-semibold">Email reply</h2>
         <p className="mt-2 whitespace-pre-wrap">{row.email_reply || "-"}</p>
-        <h2 className="mt-8 font-semibold">Chat ({chatScore}/10)</h2>
+        <h2 className="mt-8 font-semibold">Chat</h2>
         <p className="mt-2 whitespace-pre-wrap">{row.chat_log || "-"}</p>
         <h2 className="mt-8 font-semibold">Task 1 source</h2>
         <p className="mt-2">{row.source1 || "-"}</p>
-        <h2 className="mt-4 font-semibold">Task 1 answer ({task1Score}/10)</h2>
+        <h2 className="mt-4 font-semibold">Task 1 answer</h2>
         <p className="mt-2 whitespace-pre-wrap">{row.task1 || "-"}</p>
         <h2 className="mt-8 font-semibold">Task 2 source</h2>
         <p className="mt-2">{row.source2 || "-"}</p>
-        <h2 className="mt-4 font-semibold">Task 2 answer ({task2Score}/10)</h2>
+        <h2 className="mt-4 font-semibold">Task 2 answer</h2>
         <p className="mt-2 whitespace-pre-wrap">{row.task2 || "-"}</p>
       </div>
     </main>
