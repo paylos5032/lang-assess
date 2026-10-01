@@ -7,12 +7,28 @@ export default function Welcome() {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [position, setPosition] = useState("");
+  const [language, setLanguage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("id") || "";
     setId(value);
     if (value) localStorage.setItem("testid", value);
+
+    async function load() {
+      if (!value) return;
+      const { data } = await supabase
+        .from("assessments")
+        .select("company, position, language")
+        .eq("id", value)
+        .single();
+      if (data?.company) setCompany(data.company);
+      if (data?.position) setPosition(data.position);
+      if (data?.language) setLanguage(data.language);
+    }
+    load();
   }, []);
 
   async function start() {
@@ -39,6 +55,9 @@ export default function Welcome() {
     <main className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-md text-center">
         <h1 className="text-3xl font-semibold text-black">Before you start</h1>
+        <p className="mt-4 text-black">
+          {company || "Company"} / {position || "Position"} / {language || "Language"}
+        </p>
         <p className="mt-4 text-gray-600">
           Stay on this page. The translation tasks are timed. You cannot go
           back after you submit.
