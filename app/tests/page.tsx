@@ -27,15 +27,23 @@ export default function Tests() {
   const [query, setQuery] = useState("");
 
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from("assessments")
-        .select("id, company, position, language, candidate, email, created_at, ai_grade")
-        .order("created_at", { ascending: false });
-      if (data) setRows(data as Row[]);
-    }
     load();
   }, []);
+
+  async function load() {
+    const { data } = await supabase
+      .from("assessments")
+      .select("id, company, position, language, candidate, email, created_at, ai_grade")
+      .order("created_at", { ascending: false });
+    if (data) setRows(data as Row[]);
+  }
+
+  async function remove(id: string, name: string) {
+    const ok = window.confirm("Delete " + (name || id) + "?");
+    if (!ok) return;
+    await supabase.from("assessments").delete().eq("id", id);
+    load();
+  }
 
   function formatDate(value: string) {
     if (!value) return "-";
@@ -78,6 +86,12 @@ export default function Tests() {
             <a className="mt-2 inline-block underline" href={"/report?id=" + row.id}>
               Open report
             </a>
+            <button
+              onClick={() => remove(row.id, row.candidate)}
+              className="ml-4 text-sm text-red-600 underline"
+            >
+              Delete
+            </button>
           </div>
         ))}
       </div>
