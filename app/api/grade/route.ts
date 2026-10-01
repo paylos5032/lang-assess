@@ -22,6 +22,7 @@ export async function POST(request: Request) {
 You grade a customer-service language assessment.
 Language to assess: ${data.language || "unknown"}
 Candidate: ${data.candidate || "unknown"}
+Position: ${data.position || "unknown"}
 
 Task 1 source:
 ${data.source1 || "-"}
@@ -44,14 +45,21 @@ ${data.chat_log || "-"}
 Left task 1 tab: ${data.left_tab1 || "no"}
 Left task 2 tab: ${data.left_tab2 || "no"}
 
-Return plain text with:
-Grade: A, B, C, or D
-Score: a number out of 100
-Accuracy
-Tone
-Grammar
-What to improve
-Do not use markdown.
+Return plain text only. No markdown. Use exactly these headings:
+
+Soft skills grade: A, B, C, or D
+Soft skills score: a number out of 100
+Soft skills notes:
+Judge only the email reply and the chat. Tone, empathy, clarity, and whether they handled an unhappy customer.
+
+Translation grade: A, B, C, or D
+Translation score: a number out of 100
+Translation notes:
+Judge only Task 1 and Task 2. Accuracy, grammar, and natural language. Task 1 should be English. Task 2 should be ${data.language || "the assessed language"}.
+
+Hire recommendation: Strong hire, Hire, Medium hire, or No hire
+Why:
+One short reason.
 `;
 
   const response = await fetch("https://api.x.ai/v1/chat/completions", {
