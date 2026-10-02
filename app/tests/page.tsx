@@ -33,6 +33,7 @@ function status(row: Row) {
 export default function Tests() {
   const [rows, setRows] = useState<Row[]>([]);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("All");
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
@@ -75,7 +76,9 @@ export default function Tests() {
       " " +
       (row.company || "")
     ).toLowerCase();
-    return text.includes(query.toLowerCase().trim());
+    const matchesText = text.includes(query.toLowerCase().trim());
+    const matchesStatus = filter === "All" || status(row) === filter;
+    return matchesText && matchesStatus;
   });
 
   return (
@@ -88,6 +91,16 @@ export default function Tests() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
+        <select
+          className="mt-3 w-full rounded-xl border border-gray-300 p-3 text-black"
+          value={filter}
+          onChange={(event) => setFilter(event.target.value)}
+        >
+          <option>All</option>
+          <option>Not started</option>
+          <option>In progress</option>
+          <option>Finished</option>
+        </select>
         <p className="mt-3 text-gray-600">Newest first.</p>
         {shown.length === 0 && <p className="mt-6">No tests found.</p>}
         {shown.map((row) => (
