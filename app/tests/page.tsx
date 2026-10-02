@@ -24,6 +24,15 @@ function findLine(text: string, label: string) {
   return line || "";
 }
 
+function hire(text: string) {
+  const line = findLine(text, "hire recommendation").toLowerCase();
+  if (line.includes("strong hire")) return "Strong hire";
+  if (line.includes("medium hire")) return "Medium hire";
+  if (line.includes("no hire")) return "No hire";
+  if (line.includes("hire")) return "Hire";
+  return "Not graded";
+}
+
 function status(row: Row) {
   if (row.task2 && row.task2.trim()) return "Finished";
   if (row.candidate && row.candidate.trim()) return "In progress";
@@ -34,6 +43,7 @@ export default function Tests() {
   const [rows, setRows] = useState<Row[]>([]);
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All");
+  const [hireFilter, setHireFilter] = useState("All");
   const [copied, setCopied] = useState("");
 
   useEffect(() => {
@@ -78,7 +88,8 @@ export default function Tests() {
     ).toLowerCase();
     const matchesText = text.includes(query.toLowerCase().trim());
     const matchesStatus = filter === "All" || status(row) === filter;
-    return matchesText && matchesStatus;
+    const matchesHire = hireFilter === "All" || hire(row.ai_grade) === hireFilter;
+    return matchesText && matchesStatus && matchesHire;
   });
 
   return (
@@ -100,6 +111,18 @@ export default function Tests() {
           <option>Not started</option>
           <option>In progress</option>
           <option>Finished</option>
+        </select>
+        <select
+          className="mt-3 w-full rounded-xl border border-gray-300 p-3 text-black"
+          value={hireFilter}
+          onChange={(event) => setHireFilter(event.target.value)}
+        >
+          <option>All</option>
+          <option>Strong hire</option>
+          <option>Hire</option>
+          <option>Medium hire</option>
+          <option>No hire</option>
+          <option>Not graded</option>
         </select>
         <p className="mt-3 text-gray-600">Newest first.</p>
         {shown.length === 0 && <p className="mt-6">No tests found.</p>}
