@@ -9,6 +9,8 @@ export default function Task() {
   const [language, setLanguage] = useState("");
   const [answer, setAnswer] = useState("");
   const [seconds, setSeconds] = useState(12 * 60);
+  const [loaded, setLoaded] = useState(false);
+  const [warned, setWarned] = useState(false);
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("id") || "";
@@ -16,7 +18,10 @@ export default function Task() {
     if (value) localStorage.setItem("testid", value);
 
     async function load() {
-      if (!value) return;
+      if (!value) {
+        setLoaded(true);
+        return;
+      }
       const { data } = await supabase
         .from("assessments")
         .select("source1, minutes, language")
@@ -25,6 +30,7 @@ export default function Task() {
       if (data?.source1) setSource(data.source1);
       if (data?.language) setLanguage(data.language);
       if (data?.minutes) setSeconds(Number(data.minutes) * 60);
+      setLoaded(true);
     }
     load();
   }, []);
@@ -33,11 +39,15 @@ export default function Task() {
     function onHide() {
       if (document.hidden && id) {
         supabase.from("assessments").update({ left_tab1: "yes" }).eq("id", id);
+        if (!warned) {
+          setWarned(true);
+          window.alert("You left the page. This is recorded.");
+        }
       }
     }
     document.addEventListener("visibilitychange", onHide);
     return () => document.removeEventListener("visibilitychange", onHide);
-  }, [id]);
+  }, [id, warned]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -79,7 +89,9 @@ export default function Task() {
           onCut={(event) => event.preventDefault()}
           onContextMenu={(event) => event.preventDefault()}
         >
-          {source || "Loading text..."}
+          {!loaded
+            ? "Loading text..."
+            : source || "No text was saved for this test. Create a new link."}
         </p>
         <textarea
           className="mt-6 h-40 w-full rounded-xl border border-gray-300 p-3 text-black"
