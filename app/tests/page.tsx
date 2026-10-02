@@ -16,11 +16,11 @@ type Row = {
   task2: string;
 };
 
-function hireLine(text: string) {
+function findLine(text: string, label: string) {
   if (!text) return "";
   const line = text
     .split("\n")
-    .find((item) => item.toLowerCase().includes("hire recommendation"));
+    .find((item) => item.toLowerCase().includes(label));
   return line || "";
 }
 
@@ -111,8 +111,14 @@ export default function Tests() {
               {row.company || "-"} / {row.position || "-"} / {row.language || "-"}
             </p>
             <p className="mt-1">{status(row)}</p>
-            {hireLine(row.ai_grade) && (
-              <p className="mt-1">{hireLine(row.ai_grade)}</p>
+            {findLine(row.ai_grade, "soft skills grade") && (
+              <p>{findLine(row.ai_grade, "soft skills grade")}</p>
+            )}
+            {findLine(row.ai_grade, "translation grade") && (
+              <p>{findLine(row.ai_grade, "translation grade")}</p>
+            )}
+            {findLine(row.ai_grade, "hire recommendation") && (
+              <p>{findLine(row.ai_grade, "hire recommendation")}</p>
             )}
             <a className="mt-2 inline-block underline" href={"/report?id=" + row.id}>
               Open report
