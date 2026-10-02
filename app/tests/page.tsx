@@ -25,6 +25,7 @@ function hireLine(text: string) {
 export default function Tests() {
   const [rows, setRows] = useState<Row[]>([]);
   const [query, setQuery] = useState("");
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     load();
@@ -43,6 +44,12 @@ export default function Tests() {
     if (!ok) return;
     await supabase.from("assessments").delete().eq("id", id);
     load();
+  }
+
+  function copyLink(id: string) {
+    const link = window.location.origin + "/welcome?id=" + id;
+    navigator.clipboard.writeText(link);
+    setCopied(id);
   }
 
   function formatDate(value: string) {
@@ -86,6 +93,12 @@ export default function Tests() {
             <a className="mt-2 inline-block underline" href={"/report?id=" + row.id}>
               Open report
             </a>
+            <button
+              onClick={() => copyLink(row.id)}
+              className="ml-4 text-sm underline"
+            >
+              {copied === row.id ? "Copied" : "Copy candidate link"}
+            </button>
             <button
               onClick={() => remove(row.id, row.candidate)}
               className="ml-4 text-sm text-red-600 underline"
