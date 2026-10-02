@@ -12,6 +12,8 @@ type Row = {
   email: string;
   created_at: string;
   ai_grade: string;
+  task1: string;
+  task2: string;
 };
 
 function hireLine(text: string) {
@@ -20,6 +22,12 @@ function hireLine(text: string) {
     .split("\n")
     .find((item) => item.toLowerCase().includes("hire recommendation"));
   return line || "";
+}
+
+function status(row: Row) {
+  if (row.task2 && row.task2.trim()) return "Finished";
+  if (row.candidate && row.candidate.trim()) return "In progress";
+  return "Not started";
 }
 
 export default function Tests() {
@@ -34,7 +42,9 @@ export default function Tests() {
   async function load() {
     const { data } = await supabase
       .from("assessments")
-      .select("id, company, position, language, candidate, email, created_at, ai_grade")
+      .select(
+        "id, company, position, language, candidate, email, created_at, ai_grade, task1, task2"
+      )
       .order("created_at", { ascending: false });
     if (data) setRows(data as Row[]);
   }
@@ -87,6 +97,7 @@ export default function Tests() {
             <p className="text-sm text-gray-600">
               {row.company || "-"} / {row.position || "-"} / {row.language || "-"}
             </p>
+            <p className="mt-1">{status(row)}</p>
             {hireLine(row.ai_grade) && (
               <p className="mt-1">{hireLine(row.ai_grade)}</p>
             )}
