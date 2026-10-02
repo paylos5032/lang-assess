@@ -129,6 +129,7 @@ export default function Tests() {
         {shown.map((row) => (
           <div key={row.id} className="mt-6 border-t border-gray-200 pt-4">
             <p>{row.candidate || "No name yet"}</p>
+            <p className="text-sm text-gray-600">{row.email || "No email yet"}</p>
             <p className="text-sm text-gray-600">{formatDate(row.created_at)}</p>
             <p className="text-sm text-gray-600">
               {row.company || "-"} / {row.position || "-"} / {row.language || "-"}
