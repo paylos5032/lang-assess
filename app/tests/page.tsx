@@ -96,6 +96,12 @@ export default function Tests() {
     <main className="min-h-screen bg-white p-8">
       <div className="mx-auto max-w-xl text-black">
         <h1 className="text-3xl font-semibold">All tests</h1>
+        <button
+          onClick={load}
+          className="mt-4 rounded-full border border-black px-5 py-2 text-sm text-black"
+        >
+          Refresh
+        </button>
         <input
           className="mt-6 w-full rounded-xl border border-gray-300 p-3 text-black"
           placeholder="Search by name, email, or company"
