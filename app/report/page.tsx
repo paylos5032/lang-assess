@@ -19,6 +19,8 @@ type Row = {
   left_tab1: string;
   left_tab2: string;
   ai_grade: string;
+  camera_url: string;
+  screen_url: string;
 };
 
 export default function Report() {
@@ -95,7 +97,10 @@ export default function Report() {
   return (
     <main className="min-h-screen bg-white p-8">
       <div className="mx-auto max-w-xl text-black">
-        <h1 className="text-3xl font-semibold">Company report</h1>
+        <a href="/tests" className="text-sm underline">
+          Back to all tests
+        </a>
+        <h1 className="mt-4 text-3xl font-semibold">Company report</h1>
         <p className="mt-6 text-2xl font-semibold">Score: {total} / 40</p>
         <button
           onClick={grade}
@@ -107,6 +112,21 @@ export default function Report() {
         {row.ai_grade && (
           <pre className="mt-6 whitespace-pre-wrap text-sm">{row.ai_grade}</pre>
         )}
+
+        <h2 className="mt-8 font-semibold">Camera</h2>
+        {row.camera_url ? (
+          <video src={row.camera_url} controls className="mt-3 w-full rounded-xl" />
+        ) : (
+          <p className="mt-2">No camera video yet.</p>
+        )}
+
+        <h2 className="mt-8 font-semibold">Screen</h2>
+        {row.screen_url ? (
+          <video src={row.screen_url} controls className="mt-3 w-full rounded-xl" />
+        ) : (
+          <p className="mt-2">No screen video yet.</p>
+        )}
+
         <p className="mt-6">Candidate: {row.candidate || "-"}</p>
         <p>Email: {row.email || "-"}</p>
         <p>Company: {row.company || "-"}</p>
