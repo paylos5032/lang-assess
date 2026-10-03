@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
+const SUPPORT_EMAIL = "you@email.com";
+
 export default function Welcome() {
   const [id, setId] = useState("");
   const [name, setName] = useState("");
@@ -12,6 +14,7 @@ export default function Welcome() {
   const [language, setLanguage] = useState("");
   const [minutes, setMinutes] = useState("");
   const [error, setError] = useState("");
+  const [help, setHelp] = useState(false);
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("id") || "";
@@ -45,6 +48,7 @@ export default function Welcome() {
         .eq("id", id);
       if (saveError) {
         setError(saveError.message);
+        setHelp(true);
         return;
       }
     }
@@ -93,10 +97,30 @@ export default function Welcome() {
         >
           I understand
         </button>
-        <p className="mt-8 text-sm text-gray-500">
+        <button
+          onClick={() => setHelp(true)}
+          className="mt-6 block w-full text-sm text-gray-500 underline"
+        >
           If something does not work, contact support.
-        </p>
+        </button>
       </div>
+
+      {help && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center text-black">
+            <h2 className="text-xl font-semibold">Contact support</h2>
+            <p className="mt-3 text-sm text-gray-600">
+              Email {SUPPORT_EMAIL} and include this reference: {id || "no id"}
+            </p>
+            <button
+              onClick={() => setHelp(false)}
+              className="mt-6 rounded-full bg-black px-6 py-3 text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
