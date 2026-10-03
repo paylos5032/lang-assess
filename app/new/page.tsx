@@ -18,6 +18,10 @@ export default function NewAssessment() {
   const [busy, setBusy] = useState(false);
 
   async function createLink() {
+    if (!text1.trim() || !text2.trim()) {
+      setError("Generate or write both texts before you create the link.");
+      return;
+    }
     const id = Math.random().toString(36).slice(2, 10);
     const { error: saveError } = await supabase.from("assessments").insert({
       id,
