@@ -10,6 +10,7 @@ export default function Welcome() {
   const [company, setCompany] = useState("");
   const [position, setPosition] = useState("");
   const [language, setLanguage] = useState("");
+  const [minutes, setMinutes] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -21,12 +22,13 @@ export default function Welcome() {
       if (!value) return;
       const { data } = await supabase
         .from("assessments")
-        .select("company, position, language")
+        .select("company, position, language, minutes")
         .eq("id", value)
         .single();
       if (data?.company) setCompany(data.company);
       if (data?.position) setPosition(data.position);
       if (data?.language) setLanguage(data.language);
+      if (data?.minutes) setMinutes(data.minutes);
     }
     load();
   }, []);
@@ -57,6 +59,9 @@ export default function Welcome() {
         <h1 className="text-3xl font-semibold text-black">Before you start</h1>
         <p className="mt-4 text-black">
           {company || "Company"} / {position || "Position"} / {language || "Language"}
+        </p>
+        <p className="mt-2 text-black">
+          Each translation has {minutes || "12"} minutes.
         </p>
         <p className="mt-4 text-gray-600">
           Stay on this page. The translation tasks are timed. You cannot go
