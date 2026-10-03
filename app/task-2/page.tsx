@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
+import { stopAndSave } from "../lib/recording";
 
 export default function TaskTwo() {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [source, setSource] = useState("");
   const [language, setLanguage] = useState("");
@@ -11,6 +14,8 @@ export default function TaskTwo() {
   const [seconds, setSeconds] = useState(12 * 60);
   const [loaded, setLoaded] = useState(false);
   const [warned, setWarned] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const value = new URLSearchParams(window.location.search).get("id") || "";
@@ -51,23 +56,29 @@ export default function TaskTwo() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSeconds((value) => {
-        if (value <= 1) {
-          clearInterval(timer);
-          finish();
-          return 0;
-        }
-        return value - 1;
-      });
+      setSeconds((value) => (value <= 1 ? 0 : value - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [id, answer]);
+  }, []);
+
+  useEffect(() => {
+    if (seconds === 0 && id) finish();
+  }, [seconds]);
 
   async function finish() {
-    if (id) {
-      await supabase.from("assessments").update({ task2: answer }).eq("id", id);
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (id) {
+        await supabase.from("assessments").update({ task2: answer }).eq("id", id);
+        await stopAndSave(id);
+      }
+      router.push(id ? "/done?id=" + id : "/done");
+    } catch (err) {
+      setBusy(false);
+      setError(err instanceof Error ? err.message : "Could not save the video");
     }
-    window.location.href = id ? "/done?id=" + id : "/done";
   }
 
   const minutes = Math.floor(seconds / 60);
@@ -83,12 +94,7 @@ export default function TaskTwo() {
         <p className="mt-2 text-black">
           {minutes}:{rest.toString().padStart(2, "0")}
         </p>
-        <p
-          className="mt-6 select-none text-black"
-          onCopy={(event) => event.preventDefault()}
-          onCut={(event) => event.preventDefault()}
-          onContextMenu={(event) => event.preventDefault()}
-        >
+        <p className="mt-6 select-none text-black">
           {!loaded
             ? "Loading text..."
             : source || "No text was saved for this test. Create a new link."}
@@ -100,11 +106,12 @@ export default function TaskTwo() {
           onChange={(event) => setAnswer(event.target.value)}
           onPaste={(event) => event.preventDefault()}
         />
+        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
         <button
           onClick={finish}
           className="mt-8 rounded-full bg-black px-6 py-3 text-white"
         >
-          Done
+          {busy ? "Saving videos..." : "Done"}
         </button>
       </div>
     </main>
