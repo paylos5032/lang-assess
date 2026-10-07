@@ -96,9 +96,15 @@ export default function Tests() {
     <main className="min-h-screen bg-white p-8">
       <div className="mx-auto max-w-xl text-black">
         <h1 className="text-3xl font-semibold">All tests</h1>
+        <a
+          href="/new"
+          className="mt-4 inline-block rounded-full bg-black px-5 py-2 text-sm text-white"
+        >
+          New assessment
+        </a>
         <button
           onClick={load}
-          className="mt-4 rounded-full border border-black px-5 py-2 text-sm text-black"
+          className="ml-3 rounded-full border border-black px-5 py-2 text-sm text-black"
         >
           Refresh
         </button>
