@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 const replies = [
@@ -10,6 +11,7 @@ const replies = [
 ];
 
 export default function Chat() {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -51,7 +53,7 @@ export default function Chat() {
     if (id) {
       await supabase.from("assessments").update({ chat_log: chatText }).eq("id", id);
     }
-    window.location.href = id ? "/task?id=" + id : "/task";
+    router.push(id ? "/task?id=" + id : "/task");
   }
 
   return (

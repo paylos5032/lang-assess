@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 export default function Soft() {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [reply, setReply] = useState("");
 
@@ -20,7 +22,7 @@ export default function Soft() {
         .update({ email_reply: reply })
         .eq("id", id);
     }
-    window.location.href = id ? "/chat?id=" + id : "/chat";
+    router.push(id ? "/chat?id=" + id : "/chat");
   }
 
   return (

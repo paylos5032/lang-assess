@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Mock() {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [text, setText] = useState("");
 
@@ -13,7 +15,7 @@ export default function Mock() {
   }, []);
 
   function nextPage() {
-    window.location.href = id ? "/soft?id=" + id : "/soft";
+    router.push(id ? "/soft?id=" + id : "/soft");
   }
 
   return (
@@ -21,7 +23,7 @@ export default function Mock() {
       <div className="mx-auto max-w-xl">
         <h1 className="text-3xl font-semibold text-black">Practice</h1>
         <p className="mt-3 text-gray-600">
-          This is a dummy sentence. It is not scored.
+          This is a dummy sentence. It is not scored. Recording is still on.
         </p>
         <p className="mt-6 text-black">The weather is nice today.</p>
         <textarea

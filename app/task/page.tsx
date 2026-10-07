@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../lib/supabase";
 
 export default function Task() {
+  const router = useRouter();
   const [id, setId] = useState("");
   const [source, setSource] = useState("");
   const [language, setLanguage] = useState("");
@@ -51,23 +53,16 @@ export default function Task() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setSeconds((value) => {
-        if (value <= 1) {
-          clearInterval(timer);
-          finish();
-          return 0;
-        }
-        return value - 1;
-      });
+      setSeconds((value) => (value <= 1 ? 0 : value - 1));
     }, 1000);
     return () => clearInterval(timer);
-  }, [id, answer]);
+  }, []);
 
   async function finish() {
     if (id) {
       await supabase.from("assessments").update({ task1: answer }).eq("id", id);
     }
-    window.location.href = id ? "/task-2?id=" + id : "/task-2";
+    router.push(id ? "/task-2?id=" + id : "/task-2");
   }
 
   const minutes = Math.floor(seconds / 60);
@@ -83,12 +78,7 @@ export default function Task() {
         <p className="mt-2 text-black">
           {minutes}:{rest.toString().padStart(2, "0")}
         </p>
-        <p
-          className="mt-6 select-none text-black"
-          onCopy={(event) => event.preventDefault()}
-          onCut={(event) => event.preventDefault()}
-          onContextMenu={(event) => event.preventDefault()}
-        >
+        <p className="mt-6 select-none text-black">
           {!loaded
             ? "Loading text..."
             : source || "No text was saved for this test. Create a new link."}
